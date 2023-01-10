@@ -1,0 +1,63 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/Memory.hdl
+
+/**
+ * The complete address space of the Hack computer's memory,
+ * including RAM and memory-mapped I/O. 
+ * The chip facilitates read and write operations, as follows:
+ *     Read:  out(t) = Memory[address(t)](t)
+ *     Write: if load(t-1) then Memory[address(t-1)](t) = in(t-1)
+ * In words: the chip always outputs the value stored at the memory 
+ * location specified by address. If load==1, the in value is loaded 
+ * into the memory location specified by address. This value becomes 
+ * available through the out output from the next time step onward.
+ * Address space rules:
+ * Only the upper 16K+8K+1 words of the Memory chip are used. 
+ * Access to address>0x6000 is invalid. Access to any address in 
+ * the range 0x4000-0x5FFF results in accessing the screen memory 
+ * map. Access to address 0x6000 results in accessing the keyboard 
+ * memory map. The behavior in these addresses is described in the 
+ * Screen and Keyboard chip specifications given in the book.
+ */
+
+CHIP Memory {
+    IN in[16], load, address[15];
+    OUT out[16];
+
+    PARTS:
+    // if the MSB of address is 1 - don't use ram, use otherwise
+    Not(in=address[14], out=useRam);
+    // if both load and useRam are 1 - rewrite RAM
+    And(a=useRam, b=load, out=rewriteRam);
+
+    // if both address[13] and address[14] are set - get the keyboard value (11 0000 0000 0000 == 24576)
+    And(a=address[13], b=address[14], out=getKeyboard);
+    Not(in=getKeyboard, out=notKeyboard);
+
+    // if MSB is 1 - that means we are past the RAM and want to write on the screen (if load is also set)
+    And(a=address[14], b=load, out=loadAndAddress14);
+    // and getKeyboard is not
+    And(a=notKeyboard, b=loadAndAddress14, out=rewriteScreen);
+
+    // check if any of the first 12 address bits are not 0
+    Or12Way(in=address[0..11], out=or0to11);
+    // if both getKeyboard and or0to11 are 1 - we are accessing the address outside of available
+    And(a=getKeyboard, b=or0to11, out=addressOutOfBounds);
+
+    // use first 14 bits of address to find correct word in RAM16K
+    RAM16K(in=in, load=rewriteRam, address=address[0..13], out=ramOut);
+    // give 0..12 (8k) to the screen. write if rewriteScreen is set
+    Screen(in=in, load=rewriteScreen, address=address[0..12], out=screenOut);
+    // get a keyboard out
+    Keyboard(out=keyboardOut);
+
+    // decide if we want ram or screen based on address's MSB (if address > 16383 - it's the screen or the keyboard)
+    Mux16(a=ramOut, b=screenOut, sel=address[14], out=ramOrScreen);
+    // check if we need to output keyboard value instead
+    Mux16(a=ramOrScreen, b=keyboardOut, sel=getKeyboard, out=ramOrScreenOrKB);
+
+    // if addressOutOfBounds - return 0, otherwise return a result of previous choices
+    Mux16(a=ramOrScreenOrKB, b=false, sel=addressOutOfBounds, out=out);
+}

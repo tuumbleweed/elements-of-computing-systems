@@ -1,0 +1,22 @@
+/**
+ * 12-way Or: 
+ * out = (in[0] or in[1] or ... or in[11])
+ */
+
+CHIP Or12Way {
+    IN in[12];
+    OUT out;
+
+    PARTS:
+    Or(a=in[0], b=in[1], out=or01);
+    Or(a=in[2], b=in[3], out=or23);
+    Or(a=in[4], b=in[5], out=or45);
+    Or(a=in[6], b=in[7], out=or67);
+    Or(a=in[8], b=in[9], out=or89);
+    Or(a=in[10], b=in[11], out=or10to11);
+    Or(a=or01, b=or23, out=or0to3);
+    Or(a=or45, b=or67, out=or4to7);
+    Or(a=or89, b=or10to11, out=or8to11);
+    Or(a=or0to3, b=or4to7, out=or0to7);
+    Or(a=or8to11, b=or0to7, out=out);
+}
