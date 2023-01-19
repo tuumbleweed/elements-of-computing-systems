@@ -1,0 +1,41 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+// this Decode chip decodes the instruction
+
+CHIP Decode {
+
+    IN  instruction[16]; // Instruction for execution
+
+    OUT  a,                       // comp-a-bit
+         c1, c2, c3, c4, c5, c6,  // 6 comp-c-bits
+         d1, d2, d3,              // 3 dest bits
+         j1, j2, j3;              // 3 jump bits
+
+    PARTS:
+
+    // AND instruction bits with MSB of instruction (instruction[15])
+    // if it's an A-instruction - all C-instruction bits will be equal 0
+    // 1 С-instruction a bit
+    And(a=instruction[12], b=instruction[15], out=a);
+
+    // 6 C-instruction c bits
+    And(a=instruction[11], b=instruction[15], out=c1);
+    And(a=instruction[10], b=instruction[15], out=c2);
+    And(a=instruction[9], b=instruction[15], out=c3);
+    And(a=instruction[8], b=instruction[15], out=c4);
+    And(a=instruction[7], b=instruction[15], out=c5);
+    And(a=instruction[6], b=instruction[15], out=c6);
+
+    // 3 C-instruction dest bits
+    And(a=instruction[5], b=instruction[15], out=d1);
+    And(a=instruction[4], b=instruction[15], out=d2);
+    And(a=instruction[3], b=instruction[15], out=d3);
+
+    // 3 C-instruction jump bits
+    And(a=instruction[2], b=instruction[15], out=j1);
+    And(a=instruction[1], b=instruction[15], out=j2);
+    And(a=instruction[0], b=instruction[15], out=j3);
+}

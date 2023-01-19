@@ -1,0 +1,31 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/And16.hdl
+
+/**
+ * 15-bit bitwise And:
+ * for i = 0..14: out[i] = (a[i] and b[i])
+ */
+
+CHIP RemoveMSB {
+    IN a[16];
+    OUT out[15];
+
+    PARTS:
+    And(a=a[0], b=true, out=out[0]);
+    And(a=a[1], b=true, out=out[1]);
+    And(a=a[2], b=true, out=out[2]);
+    And(a=a[3], b=true, out=out[3]);
+    And(a=a[4], b=true, out=out[4]);
+    And(a=a[5], b=true, out=out[5]);
+    And(a=a[6], b=true, out=out[6]);
+    And(a=a[7], b=true, out=out[7]);
+    And(a=a[8], b=true, out=out[8]);
+    And(a=a[9], b=true, out=out[9]);
+    And(a=a[10], b=true, out=out[10]);
+    And(a=a[11], b=true, out=out[11]);
+    And(a=a[12], b=true, out=out[12]);
+    And(a=a[13], b=true, out=out[13]);
+    And(a=a[14], b=true, out=out[14]);
+}
